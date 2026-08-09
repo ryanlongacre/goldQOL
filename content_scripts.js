@@ -4,7 +4,8 @@
 
     const doc = new DOMParser().parseFromString(html, "text/html");
 
-    const classes = doc.querySelectorAll(".scheduleItem");
+    const classes = doc.querySelector(".course-select-modal");
 
-    classes.forEach(el => console.log(el.innerHTML));
+
+    document.getElementsByClassName("wk-schedule js-full")[0].appendChild(document.importNode(classes, true));
 })();
