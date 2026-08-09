@@ -4,19 +4,16 @@
     "description": "QOL features I wish I had in gold",
     "permissions": ["storage"],
     "host_permissions": ["https://my.sa.ucsb.edu/gold/*"],
-    "background": {
-        "service_worker": "background.js"
-    },
     "content_scripts": [
         {
-            "matches": ["https://my.sa.ucsb.edu/gold/*"],
+            "matches": ["https://my.sa.ucsb.edu/gold/WeeklyStudentSchedule.aspx"],
             "js": ["content_scripts.js"]
         }
     ],
     "web_accessible_resources": [
         {
-            "resources": [],
-            "matches": ["https://my.sa.ucsb.edu/gold/*"]
+            "resources": ["assets/ext-icon.png"],
+            "matches": ["https://my.sa.ucsb.edu/*"]
         }
     ],
     "action": {
