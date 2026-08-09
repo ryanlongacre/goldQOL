@@ -1,0 +1,32 @@
+{
+    "name": "Gold QOL",
+    "version": "0.1.0",
+    "description": "QOL features I wish I had in gold",
+    "permissions": ["storage"],
+    "host_permissions": ["https://my.sa.ucsb.edu/gold/*"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://my.sa.ucsb.edu/gold/*"],
+            "js": ["content_scripts.js"]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [],
+            "matches": ["https://my.sa.ucsb.edu/gold/*"]
+        }
+    ],
+    "action": {
+      "default_icon": {
+        "16": "assets/ext-icon.png",
+        "24": "assets/ext-icon.png",
+        "32": "assets/ext-icon.png"
+      },
+      "default_title": "My YT Bookmarks",
+      "default_popup": "popup.html"
+    },
+    "manifest_version": 3
+}
