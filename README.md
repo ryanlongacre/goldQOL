@@ -8,4 +8,5 @@ Be able to unclick once clicked
 Kinda goes into the one above, if alraedy clicked, can't be clicked again (unless to remove)
 Some kinda differentiator between the cart ones and the real ones
 Some kind of collision detection
+When a section is clicked, the current length of the thing is that of a lecture (1:15) not a section (50)
 
