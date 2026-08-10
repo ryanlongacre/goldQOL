@@ -36,7 +36,7 @@
    sampleEvent.dataset.end = "01:45 PM";
    sampleEvent.dataset.content = "CMPSC 156";
    sampleEvent.dataset.event = "ILP 2201";
-   sampleEvent.style="top: 315px; height: 75px;";
+   sampleEvent.style= "top: " + getSeparation("1:00 PM") + "px; height: 75px;";
 
    const innerElement = document.createElement("a");
    
@@ -67,8 +67,18 @@
 
 
 
+
    
 
 
    
 })();
+
+//Want to make it so that you put in the string "9:30 AM", it outputs 90, cause thats 90 minutes away from 8
+function getSeparation(time) {
+    //should be just a august 9th at 8
+    const [val, ap] = time.split(" ");
+    const [hour, minute] = val.split(":").map(num => parseInt(num, 10));
+    const adjustedHour = ap === "AM" ? hour : hour + 12;
+    return (adjustedHour-8) * 60 + minute;
+}
