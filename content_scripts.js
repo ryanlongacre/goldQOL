@@ -48,39 +48,29 @@
 
    const addNewEvent = (parentDiv) => {
 
-        const [days] = Array.from(parentDiv.querySelectorAll("div")).map((i) => i.innerText);
-        console.log(days.split("\n"));
-        const sampleEvent = document.createElement("li");
-        sampleEvent.className = "single-event";
-        sampleEvent.dataset.day = "T";
-        sampleEvent.dataset.start = "01:00 PM";
-        sampleEvent.dataset.end = "01:45 PM";
-        sampleEvent.dataset.content = "CMPSC 156";
-        sampleEvent.dataset.event = "ILP 2201";
-        sampleEvent.style= "top: " + getSeparation("1:00 PM") + "px; height: 75px;";
+        const [data] = Array.from(parentDiv.querySelectorAll("div")).map((i) => i.innerText);
+        const [days, time, location] = data.split("\n");
+        console.log(days);
+        //days is M W, time is 11:30 AM-12:30 PM, location is just the location
 
-        const innerElement = document.createElement("a");
+
+        let targetDiv  = parentDiv;
+        while (targetDiv.querySelector(".classTitle") === 'null') {
+            targetDiv = targetDiv.parentNode;
+        }
+        const title = (targetDiv.innerText).split("\n")[0];
+        console.log(title);
+
+        console.log(days.split(" "));
+        for (const day of days.split(" ")) {
+            console.log(day);
+            const queryString = "#pageContent_eventsgroup" + day;
+            console.log(queryString);
+            const targetCol = document.querySelector(queryString);
+            targetCol.querySelector(".single-event-ul").appendChild(getNewElement(title, day, time, location));
+        }        
+
         
-        const innerTitle = document.createElement("h1");
-        const innerLocation = document.createElement("h2");
-        const innerTime = document.createElement("p");
-
-        innerTitle.className = "event-name";
-        innerTitle.innerText = "CMPSC 156";
-        
-        innerLocation.className = "event-location";
-        innerLocation.innerText = "ILP 2201";
-        
-        innerTime.innerText = "1:00 PM - 1:45PM";
-
-        innerElement.appendChild(innerTitle);
-        innerElement.appendChild(innerLocation);
-        innerElement.appendChild(innerTime);
-
-        sampleEvent.appendChild(innerElement);
-
-        targetCol = document.querySelector("#pageContent_eventsgroupT");
-        targetCol.querySelector(".single-event-ul").appendChild(sampleEvent);
    }
 
 
@@ -100,4 +90,39 @@ function getSeparation(time) {
     const [hour, minute] = val.split(":").map(num => parseInt(num, 10));
     const adjustedHour = ap === "AM" ? hour : hour + 12;
     return (adjustedHour-8) * 60 + minute;
+}
+
+function getNewElement(title, day, time, location) {
+    const sampleEvent = document.createElement("li");
+    sampleEvent.className = "single-event";
+    sampleEvent.dataset.day = day;
+    console.log(time);
+    const [start, end] = time.split("-");
+    sampleEvent.dataset.start = start;
+    sampleEvent.dataset.end = end;
+    sampleEvent.dataset.content = title;
+    sampleEvent.dataset.event = location;
+    sampleEvent.style= "top: " + getSeparation(start) + "px; height: 75px;";
+
+    const innerElement = document.createElement("a");
+    
+    const innerTitle = document.createElement("h1");
+    const innerLocation = document.createElement("h2");
+    const innerTime = document.createElement("p");
+
+    innerTitle.className = "event-name";
+    innerTitle.innerText = title;
+    
+    innerLocation.className = "event-location";
+    innerLocation.innerText = location;
+    
+    innerTime.innerText = time;
+
+    innerElement.appendChild(innerTitle);
+    innerElement.appendChild(innerLocation);
+    innerElement.appendChild(innerTime);
+
+    sampleEvent.appendChild(innerElement);
+
+    return sampleEvent;
 }
