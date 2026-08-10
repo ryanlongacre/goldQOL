@@ -34,7 +34,6 @@
 
     const modal = document.querySelector(".course-select-modal");
     modal.addEventListener("click", (event) => {
-        console.log(event.target.outerHTML);
         if (event.target.tagName != "DIV") {
             console.log("Clicked the button");
         }
@@ -48,6 +47,9 @@
     });
 
    const addNewEvent = (parentDiv) => {
+
+        const [days] = Array.from(parentDiv.querySelectorAll("div")).map((i) => i.innerText);
+        console.log(days.split("\n"));
         const sampleEvent = document.createElement("li");
         sampleEvent.className = "single-event";
         sampleEvent.dataset.day = "T";
