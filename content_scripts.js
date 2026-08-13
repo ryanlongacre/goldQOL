@@ -6,6 +6,8 @@
 
     const classes = doc.querySelector(".course-select-modal");
 
+    chrome.storage.local.set({'current': []})
+
 
     document.getElementsByClassName("wk-schedule js-full")[0].appendChild(document.importNode(classes, true));
 
@@ -46,7 +48,7 @@
         }
     });
 
-   const addNewEvent = (parentDiv) => {
+   const addNewEvent = async (parentDiv) => {
 
         const [data] = Array.from(parentDiv.querySelectorAll("div")).map((i) => i.innerText);
         const [days, time, location] = data.split("\n");
@@ -58,30 +60,45 @@
         while (targetDiv.querySelector(".classTitle") === 'null') {
             targetDiv = targetDiv.parentNode;
         }
-        const title = (targetDiv.innerText).split("\n")[0];
-        console.log(title);
+        console.log(targetDiv.innerText);
+        const code = (targetDiv.innerText).split("\n")[0];
 
-        console.log(days.split(" "));
-        for (const day of days.split(" ")) {
-            console.log(day);
-            const queryString = "#pageContent_eventsgroup" + day;
-            console.log(queryString);
-            const targetCol = document.querySelector(queryString);
-            targetCol.querySelector(".single-event-ul").appendChild(getNewElement(title, day, time, location));
-        }        
+        const result = await chrome.storage.local.get('current');
+        const currentList = result.current || [];
 
+        if (currentList.includes(code)) {
+            console.log("Already added");
+            //Code to remove is code, day, then time
+            for (const day of days.split(" ")) {
+                const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join("");
+                const elementToRemove = document.getElementById(idOfElem);
+                elementToRemove.parentNode.removeChild(elementToRemove);
+            }
+
+            console.log("Removed");
+                
+        } else {
+            chrome.storage.local.get('current', (l) => {
+            let currentList = l.current || [];
+
+            currentList.push(code);
+
+            chrome.storage.local.set({current: currentList}, () => {
+                console.log("List updated");
+            })
+
+            console.log(days.split(" "));
+            for (const day of days.split(" ")) {
+                console.log(day);
+                const queryString = "#pageContent_eventsgroup" + day;
+                console.log(queryString);
+                const targetCol = document.querySelector(queryString);
+                targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location));
+            }
+        })    
+        }
         
-   }
-
-
-
-
-
-
-   
-
-
-   
+   }  
 })();
 
 //Want to make it so that you put in the string "9:30 AM", it outputs 90, cause thats 90 minutes away from 8
@@ -92,7 +109,7 @@ function getSeparation(time) {
     return (adjustedHour-8) * 60 + minute;
 }
 
-function getNewElement(title, day, time, location) {
+function getNewElement(code, day, time, location) {
     const sampleEvent = document.createElement("li");
     sampleEvent.className = "single-event";
     sampleEvent.dataset.day = day;
@@ -100,7 +117,7 @@ function getNewElement(title, day, time, location) {
     const [start, end] = time.split("-");
     sampleEvent.dataset.start = start;
     sampleEvent.dataset.end = end;
-    sampleEvent.dataset.content = title;
+    sampleEvent.dataset.content = code;
     sampleEvent.dataset.event = location;
     sampleEvent.style= "top: " + getSeparation(start) + "px; height: 75px;";
 
@@ -111,7 +128,7 @@ function getNewElement(title, day, time, location) {
     const innerTime = document.createElement("p");
 
     innerTitle.className = "event-name";
-    innerTitle.innerText = title;
+    innerTitle.innerText = code;
     
     innerLocation.className = "event-location";
     innerLocation.innerText = location;
@@ -123,6 +140,9 @@ function getNewElement(title, day, time, location) {
     innerElement.appendChild(innerTime);
 
     sampleEvent.appendChild(innerElement);
+
+    sampleEvent.id = code + day + start.split(" ")[0].split(":").join("");
+    console.log(sampleEvent.id);
 
     return sampleEvent;
 }
