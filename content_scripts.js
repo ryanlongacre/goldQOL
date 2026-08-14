@@ -36,16 +36,22 @@
 
     const modal = document.querySelector(".course-select-modal");
     modal.addEventListener("click", (event) => {
+        let targetDiv = event.target;
         if (event.target.tagName != "DIV") {
             console.log("Clicked the button");
-        }
-        else if (event.target.childElementCount === 1) {
-            console.log("Wrong click");
-            addNewEvent(event.target.parentNode);
+            return;
+        } else if (event.target.innerHTML.includes("top-row-inner-regcart")) {
+            targetDiv = event.target.parentNode.getElementsByClassName("top-row-inner-regcart")[0].children[0];
         } else {
-            console.log("Correct click");
-            addNewEvent(event.target);
+            while (targetDiv.className !== "top-row-inner-regcart") {
+                targetDiv = targetDiv.parentNode;
+                console.log(targetDiv.className);
+            }
+            targetDiv = targetDiv.children[0];
         }
+
+        addNewEvent(targetDiv);
+        console.log(targetDiv.outerHTML);
     });
 
    const addNewEvent = async (parentDiv) => {
