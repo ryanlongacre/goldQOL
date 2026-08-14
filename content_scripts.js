@@ -76,23 +76,34 @@
                 const elementToRemove = document.getElementById(idOfElem);
                 elementToRemove.parentNode.removeChild(elementToRemove);
             }
+            
+            chrome.storage.local.get('current', (l) => {
+                let currentList = l.current || [];
+
+                let updatedList = currentList.filter(item => item !== code);
+
+                chrome.storage.local.set({'current': updatedList}, () => {
+                    console.log(updatedList);
+                })
+            })
+
                 
         } else {
             chrome.storage.local.get('current', (l) => {
-            let currentList = l.current || [];
+                let currentList = l.current || [];
 
-            currentList.push(code);
+                currentList.push(code);
 
-            chrome.storage.local.set({current: currentList}, () => {
-                console.log("List updated");
-            })
+                chrome.storage.local.set({current: currentList}, () => {
+                    console.log("List updated");
+                })
 
-            for (const day of days.split(" ")) {
-                const queryString = "#pageContent_eventsgroup" + day;
-                const targetCol = document.querySelector(queryString);
-                targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
-            }
-        })    
+                for (const day of days.split(" ")) {
+                    const queryString = "#pageContent_eventsgroup" + day;
+                    const targetCol = document.querySelector(queryString);
+                    targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
+                }
+            })    
         }
         
    }  
