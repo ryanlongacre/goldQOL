@@ -52,30 +52,30 @@
 
         const [data] = Array.from(parentDiv.querySelectorAll("div")).map((i) => i.innerText);
         const [days, time, location] = data.split("\n");
-        console.log(days);
         //days is M W, time is 11:30 AM-12:30 PM, location is just the location
 
 
-        let targetDiv  = parentDiv;
-        while (targetDiv.querySelector(".classTitle") === 'null') {
-            targetDiv = targetDiv.parentNode;
-        }
-        console.log(targetDiv.innerText);
+        let targetDiv = parentDiv;
         const code = (targetDiv.innerText).split("\n")[0];
+        let i = 1;
+        while (targetDiv.className !== "scheduleItem") {
+            targetDiv = targetDiv.parentNode;
+            i += 1;
+        }
+        targetDiv = targetDiv.getElementsByClassName('courseTitle')[0].querySelectorAll('[id*="Id"]')[0];
+        const title = targetDiv.innerText;
+        console.log(targetDiv.innerText);
 
         const result = await chrome.storage.local.get('current');
         const currentList = result.current || [];
 
         if (currentList.includes(code)) {
-            console.log("Already added");
             //Code to remove is code, day, then time
             for (const day of days.split(" ")) {
                 const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join("");
                 const elementToRemove = document.getElementById(idOfElem);
                 elementToRemove.parentNode.removeChild(elementToRemove);
             }
-
-            console.log("Removed");
                 
         } else {
             chrome.storage.local.get('current', (l) => {
@@ -87,13 +87,10 @@
                 console.log("List updated");
             })
 
-            console.log(days.split(" "));
             for (const day of days.split(" ")) {
-                console.log(day);
                 const queryString = "#pageContent_eventsgroup" + day;
-                console.log(queryString);
                 const targetCol = document.querySelector(queryString);
-                targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location));
+                targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
             }
         })    
         }
@@ -109,15 +106,14 @@ function getSeparation(time) {
     return (adjustedHour-8) * 60 + minute;
 }
 
-function getNewElement(code, day, time, location) {
+function getNewElement(code, day, time, location, title) {
     const sampleEvent = document.createElement("li");
     sampleEvent.className = "single-event";
     sampleEvent.dataset.day = day;
-    console.log(time);
     const [start, end] = time.split("-");
     sampleEvent.dataset.start = start;
     sampleEvent.dataset.end = end;
-    sampleEvent.dataset.content = code;
+    sampleEvent.dataset.content = title;
     sampleEvent.dataset.event = location;
     sampleEvent.style= "top: " + getSeparation(start) + "px; height: 75px;";
 
@@ -128,7 +124,7 @@ function getNewElement(code, day, time, location) {
     const innerTime = document.createElement("p");
 
     innerTitle.className = "event-name";
-    innerTitle.innerText = code;
+    innerTitle.innerText = title;
     
     innerLocation.className = "event-location";
     innerLocation.innerText = location;
@@ -142,7 +138,6 @@ function getNewElement(code, day, time, location) {
     sampleEvent.appendChild(innerElement);
 
     sampleEvent.id = code + day + start.split(" ")[0].split(":").join("");
-    console.log(sampleEvent.id);
 
     return sampleEvent;
 }
