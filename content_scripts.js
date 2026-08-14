@@ -120,7 +120,8 @@ function getSeparation(time) {
     const [val, ap] = time.split(" ");
     const [hour, minute] = val.split(":").map(num => parseInt(num, 10));
     const adjustedHour = ap === "AM" ? hour : hour + 12;
-    return (adjustedHour-8) * 60 + minute;
+    const realHour = adjustedHour === 24 ? 12 : adjustedHour;
+    return (realHour-8) * 60 + minute;
 }
 
 function getNewElement(code, day, time, location, title) {
