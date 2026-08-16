@@ -54,26 +54,15 @@
         console.log(targetDiv.outerHTML);
     });
 
+    //I think the best move for the future is to implement a helper function that returns information about the class
+    //would return title, code, days, time, location, given that one div that has all of that
+
    const addNewEvent = async (parentDiv) => {
-
-        const [data] = Array.from(parentDiv.querySelectorAll("div")).map((i) => i.innerText);
-        const [days, time, location] = data.split("\n");
-        //days is M W, time is 11:30 AM-12:30 PM, location is just the location
-
-
-        let targetDiv = parentDiv;
-        const code = (targetDiv.innerText).split("\n")[0];
-        let i = 1;
-        while (targetDiv.className !== "scheduleItem") {
-            targetDiv = targetDiv.parentNode;
-            i += 1;
-        }
-        targetDiv = targetDiv.getElementsByClassName('courseTitle')[0].querySelectorAll('[id*="Id"]')[0];
-        const title = targetDiv.innerText;
-        console.log(targetDiv.innerText);
 
         const result = await chrome.storage.local.get('current');
         const currentList = result.current || [];
+
+        const [title, code, days, time, location] = getInfo(parentDiv);
 
         if (currentList.includes(code)) {
             //Code to remove is code, day, then time
@@ -162,4 +151,22 @@ function getNewElement(code, day, time, location, title) {
     sampleEvent.id = code + day + start.split(" ")[0].split(":").join("");
 
     return sampleEvent;
+}
+
+function getInfo(d) {
+    const [data] = Array.from(d.querySelectorAll("div")).map((i) => i.innerText);
+    const [days, time, location] = data.split("\n");
+    //days is M W, time is 11:30 AM-12:30 PM, location is just the location
+
+
+    let targetDiv = d;
+    const code = (targetDiv.innerText).split("\n")[0];
+    let i = 1;
+    while (targetDiv.className !== "scheduleItem") {
+        targetDiv = targetDiv.parentNode;
+        i += 1;
+    }
+    targetDiv = targetDiv.getElementsByClassName('courseTitle')[0].querySelectorAll('[id*="Id"]')[0];
+    const title = targetDiv.innerText;
+    return [title, code, days, time, location];  
 }
