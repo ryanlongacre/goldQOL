@@ -117,6 +117,8 @@
 
 //Want to make it so that you put in the string "9:30 AM", it outputs 90, cause thats 90 minutes away from 8
 function getSeparation(time) {
+
+
     const [val, ap] = time.split(" ");
     const [hour, minute] = val.split(":").map(num => parseInt(num, 10));
     const adjustedHour = ap === "AM" ? hour : hour + 12;
@@ -125,15 +127,17 @@ function getSeparation(time) {
 }
 
 function getNewElement(code, day, time, location, title) {
+    //sections have a height of 50px and lectures have a height of 75px
     const sampleEvent = document.createElement("li");
     sampleEvent.className = "single-event";
     sampleEvent.dataset.day = day;
     const [start, end] = time.split("-");
     sampleEvent.dataset.start = start;
     sampleEvent.dataset.end = end;
+    const classLength = getSeparation(end) - getSeparation(start);
     sampleEvent.dataset.content = title;
     sampleEvent.dataset.event = location;
-    sampleEvent.style= "top: " + getSeparation(start) + "px; height: 75px;";
+    sampleEvent.style= "top: " + getSeparation(start, 8) + "px; height: " + classLength + "px;";
 
     const innerElement = document.createElement("a");
     
