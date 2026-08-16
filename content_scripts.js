@@ -49,9 +49,21 @@
             }
             targetDiv = targetDiv.children[0];
         }
-
-        addNewEvent(targetDiv);
         console.log(targetDiv.outerHTML);
+        //is a section    
+        if (targetDiv.parentNode.parentNode.parentNode.parentNode.parentNode.className === "scheduleItem sectionSelect secondarySection") {
+            const lectureDiv = targetDiv.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+            const lectureInfoDiv = lectureDiv.getElementsByClassName("top-row-inner-regcart")[0].children[0];
+            const [title, code] = getInfo(lectureInfoDiv);
+            chrome.storage.local.get('current', (l) => {
+                let currentList = l.current || [];
+                if (!currentList.includes(code)) {
+                    addNewEvent(lectureInfoDiv);
+                }
+            })
+        }
+        addNewEvent(targetDiv);
+        
     });
 
     //I think the best move for the future is to implement a helper function that returns information about the class
