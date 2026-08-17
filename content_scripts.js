@@ -35,34 +35,30 @@
 
 
     const modal = document.querySelector(".course-select-modal");
-    modal.addEventListener("click", (event) => {
+    modal.addEventListener("click", async (event) => {
         let targetDiv = event.target;
         if (event.target.tagName != "DIV") {
-            console.log("Clicked the button");
             return;
         } else if (event.target.innerHTML.includes("top-row-inner-regcart")) {
             targetDiv = event.target.parentNode.getElementsByClassName("top-row-inner-regcart")[0].children[0];
         } else {
             while (targetDiv.className !== "top-row-inner-regcart") {
                 targetDiv = targetDiv.parentNode;
-                console.log(targetDiv.className);
             }
             targetDiv = targetDiv.children[0];
         }
-        console.log(targetDiv.outerHTML);
         //is a section    
         if (targetDiv.parentNode.parentNode.parentNode.parentNode.parentNode.className === "scheduleItem sectionSelect secondarySection") {
             const lectureDiv = targetDiv.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
             const lectureInfoDiv = lectureDiv.getElementsByClassName("top-row-inner-regcart")[0].children[0];
             const [title, code] = getInfo(lectureInfoDiv);
-            chrome.storage.local.get('current', (l) => {
-                let currentList = l.current || [];
-                if (!currentList.includes(code)) {
-                    addNewEvent(lectureInfoDiv);
-                }
-            })
+
+            const { current = [] } = await chrome.storage.local.get('current');
+            if (!current.includes(code)) {
+                await addNewEvent(lectureInfoDiv);
+            }
         }
-        addNewEvent(targetDiv);
+        await addNewEvent(targetDiv);
         
     });
 
@@ -84,33 +80,19 @@
                 elementToRemove.parentNode.removeChild(elementToRemove);
             }
             
-            chrome.storage.local.get('current', (l) => {
-                let currentList = l.current || [];
-
-                let updatedList = currentList.filter(item => item !== code);
-
-                chrome.storage.local.set({'current': updatedList}, () => {
-                    console.log(updatedList);
-                })
-            })
+            const updatedList = currentList.filter(item => item !== code);
+            await chrome.storage.local.set({ current: updatedList });
 
                 
         } else {
-            chrome.storage.local.get('current', (l) => {
-                let currentList = l.current || [];
 
-                currentList.push(code);
-
-                chrome.storage.local.set({current: currentList}, () => {
-                    console.log("List updated");
-                })
-
-                for (const day of days.split(" ")) {
-                    const queryString = "#pageContent_eventsgroup" + day;
-                    const targetCol = document.querySelector(queryString);
-                    targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
-                }
-            })    
+            currentList.push(code);
+            await chrome.storage.local.set({current: currentList});
+            for (const day of days.split(" ")) {
+                const queryString = "#pageContent_eventsgroup" + day;
+                const targetCol = document.querySelector(queryString);
+                targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
+            }    
         }
         
    }  
