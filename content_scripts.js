@@ -6,7 +6,8 @@
 
     const classes = doc.querySelector(".course-select-modal");
 
-    chrome.storage.local.set({'current': []})
+    chrome.storage.local.set({'current': []});
+    chrome.storage.local.set({'times' : []});
 
 
     document.getElementsByClassName("wk-schedule js-full")[0].appendChild(document.importNode(classes, true));
@@ -59,26 +60,53 @@
             }
         }
         await addNewEvent(targetDiv);
+
+
+        const up = await chrome.storage.local.get('times');
+        const up2 = up.times || [];
+        console.log("New list");
+        for (const  li of up2) {
+            console.log(li);
+        }
         
     });
 
     //I think the best move for the future is to implement a helper function that returns information about the class
     //would return title, code, days, time, location, given that one div that has all of that
 
-   const addNewEvent = async (parentDiv) => {
+    const addNewEvent = async (parentDiv) => {
+
+        //how am i going to go about doing this. i think i have to keep a list of times that have been taken
+        //but then I will also need to keep track of what class that time belongs to so I can assign the right id
+        //and also can remove when needed
+    
 
         const result = await chrome.storage.local.get('current');
         const currentList = result.current || [];
 
+        const res = await chrome.storage.local.get('times');
+        const currentTimes = res.times || [];
+
         const [title, code, days, time, location] = getInfo(parentDiv);
+
+        
 
         if (currentList.includes(code)) {
             //Code to remove is code, day, then time
+            let updatedTimes = [...currentTimes];
             for (const day of days.split(" ")) {
-                const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join("");
+                const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join(""); 
+                        
                 const elementToRemove = document.getElementById(idOfElem);
                 elementToRemove.parentNode.removeChild(elementToRemove);
+                updatedTimes = updatedTimes.filter(item => item[0] !== idOfElem);
+                console.log("Updated times:");
+                for (const li of  updatedTimes) {
+                    console.log(li);
+                }
+                
             }
+            await chrome.storage.local.set({times: updatedTimes});
             
             const updatedList = currentList.filter(item => item !== code);
             await chrome.storage.local.set({ current: updatedList });
@@ -87,12 +115,16 @@
         } else {
 
             currentList.push(code);
+            
             await chrome.storage.local.set({current: currentList});
             for (const day of days.split(" ")) {
+                const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join("");
+                currentTimes.push([idOfElem, day + ":" + time]);
                 const queryString = "#pageContent_eventsgroup" + day;
                 const targetCol = document.querySelector(queryString);
                 targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
-            }    
+            }
+            await chrome.storage.local.set({times: currentTimes});    
         }
         
    }  
