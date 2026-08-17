@@ -35,45 +35,42 @@
 
 
     const modal = document.querySelector(".course-select-modal");
-    modal.addEventListener("click", (event) => {
+    modal.addEventListener("click", async (event) => {
         let targetDiv = event.target;
         if (event.target.tagName != "DIV") {
-            console.log("Clicked the button");
             return;
         } else if (event.target.innerHTML.includes("top-row-inner-regcart")) {
             targetDiv = event.target.parentNode.getElementsByClassName("top-row-inner-regcart")[0].children[0];
         } else {
             while (targetDiv.className !== "top-row-inner-regcart") {
                 targetDiv = targetDiv.parentNode;
-                console.log(targetDiv.className);
             }
             targetDiv = targetDiv.children[0];
         }
+        //is a section    
+        if (targetDiv.parentNode.parentNode.parentNode.parentNode.parentNode.className === "scheduleItem sectionSelect secondarySection") {
+            const lectureDiv = targetDiv.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+            const lectureInfoDiv = lectureDiv.getElementsByClassName("top-row-inner-regcart")[0].children[0];
+            const [title, code] = getInfo(lectureInfoDiv);
 
-        addNewEvent(targetDiv);
-        console.log(targetDiv.outerHTML);
+            const { current = [] } = await chrome.storage.local.get('current');
+            if (!current.includes(code)) {
+                await addNewEvent(lectureInfoDiv);
+            }
+        }
+        await addNewEvent(targetDiv);
+        
     });
+
+    //I think the best move for the future is to implement a helper function that returns information about the class
+    //would return title, code, days, time, location, given that one div that has all of that
 
    const addNewEvent = async (parentDiv) => {
 
-        const [data] = Array.from(parentDiv.querySelectorAll("div")).map((i) => i.innerText);
-        const [days, time, location] = data.split("\n");
-        //days is M W, time is 11:30 AM-12:30 PM, location is just the location
-
-
-        let targetDiv = parentDiv;
-        const code = (targetDiv.innerText).split("\n")[0];
-        let i = 1;
-        while (targetDiv.className !== "scheduleItem") {
-            targetDiv = targetDiv.parentNode;
-            i += 1;
-        }
-        targetDiv = targetDiv.getElementsByClassName('courseTitle')[0].querySelectorAll('[id*="Id"]')[0];
-        const title = targetDiv.innerText;
-        console.log(targetDiv.innerText);
-
         const result = await chrome.storage.local.get('current');
         const currentList = result.current || [];
+
+        const [title, code, days, time, location] = getInfo(parentDiv);
 
         if (currentList.includes(code)) {
             //Code to remove is code, day, then time
@@ -83,33 +80,19 @@
                 elementToRemove.parentNode.removeChild(elementToRemove);
             }
             
-            chrome.storage.local.get('current', (l) => {
-                let currentList = l.current || [];
-
-                let updatedList = currentList.filter(item => item !== code);
-
-                chrome.storage.local.set({'current': updatedList}, () => {
-                    console.log(updatedList);
-                })
-            })
+            const updatedList = currentList.filter(item => item !== code);
+            await chrome.storage.local.set({ current: updatedList });
 
                 
         } else {
-            chrome.storage.local.get('current', (l) => {
-                let currentList = l.current || [];
 
-                currentList.push(code);
-
-                chrome.storage.local.set({current: currentList}, () => {
-                    console.log("List updated");
-                })
-
-                for (const day of days.split(" ")) {
-                    const queryString = "#pageContent_eventsgroup" + day;
-                    const targetCol = document.querySelector(queryString);
-                    targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
-                }
-            })    
+            currentList.push(code);
+            await chrome.storage.local.set({current: currentList});
+            for (const day of days.split(" ")) {
+                const queryString = "#pageContent_eventsgroup" + day;
+                const targetCol = document.querySelector(queryString);
+                targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
+            }    
         }
         
    }  
@@ -162,4 +145,22 @@ function getNewElement(code, day, time, location, title) {
     sampleEvent.id = code + day + start.split(" ")[0].split(":").join("");
 
     return sampleEvent;
+}
+
+function getInfo(d) {
+    const [data] = Array.from(d.querySelectorAll("div")).map((i) => i.innerText);
+    const [days, time, location] = data.split("\n");
+    //days is M W, time is 11:30 AM-12:30 PM, location is just the location
+
+
+    let targetDiv = d;
+    const code = (targetDiv.innerText).split("\n")[0];
+    let i = 1;
+    while (targetDiv.className !== "scheduleItem") {
+        targetDiv = targetDiv.parentNode;
+        i += 1;
+    }
+    targetDiv = targetDiv.getElementsByClassName('courseTitle')[0].querySelectorAll('[id*="Id"]')[0];
+    const title = targetDiv.innerText;
+    return [title, code, days, time, location];  
 }
