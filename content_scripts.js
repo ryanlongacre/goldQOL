@@ -88,6 +88,30 @@
         const currentTimes = res.times || [];
 
         const [title, code, days, time, location] = getInfo(parentDiv);
+        const [start, end] = time.split("-").map(num => getSeparation(num));
+
+        const overlaps = [];
+        console.log("Time: ");
+        for (const [id, time] of currentTimes) {
+            const s = getSeparation(time.split("-")[0]);
+            const startI = s.slice(2);
+            const day = s.slice(0, 1);
+            const endI = getSeparation(time.split("-")[1]);
+            
+            if ((start > startI) && (start < endI)) {
+                console.log("Scenario 1");
+                overlaps.push(id);
+            } else if ((end > startI) && (end < endI)) {
+                console.log("Scenario 2");
+                overlaps.push(id);
+            } else if ((start < startI) && (end > endI)) {
+                console.log("Scenario 3");
+                overlaps.push(id);
+            }
+        }
+
+        console.log("Overlaps: ");
+        console.log(overlaps);
 
         
 
