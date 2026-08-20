@@ -93,21 +93,31 @@
         const overlaps = [];
         console.log("Time: ");
         for (const [id, time] of currentTimes) {
-            const s = getSeparation(time.split("-")[0]);
-            const startI = s.slice(2);
-            const day = s.slice(0, 1);
+            const s = time.split("-")[0];
+            const [dayI, s2] = s.split("~");
+            const startI = getSeparation(s2);
             const endI = getSeparation(time.split("-")[1]);
             
-            if ((start > startI) && (start < endI)) {
-                console.log("Scenario 1");
-                overlaps.push(id);
-            } else if ((end > startI) && (end < endI)) {
-                console.log("Scenario 2");
-                overlaps.push(id);
-            } else if ((start < startI) && (end > endI)) {
-                console.log("Scenario 3");
-                overlaps.push(id);
+            for (const day of days.split("-")) {
+                const idOfElem = code + day + time.split("~")[1].split("-")[0].split(" ")[0].split(":").join("");
+                if (day !== dayI) {
+                    continue;
+                }
+                if ((start > startI) && (start < endI)) {
+                    console.log("Scenario 1");
+                    overlaps.push(id);
+                    overlaps.push(idOfElem);
+                } else if ((end > startI) && (end < endI)) {
+                    console.log("Scenario 2");
+                    overlaps.push(id);
+                    overlaps.push(idOfElem);
+                } else if ((start < startI) && (end > endI)) {
+                    console.log("Scenario 3");
+                    overlaps.push(id);
+                    overlaps.push(idOfElem);
+                }
             }
+                
         }
 
         console.log("Overlaps: ");
@@ -143,7 +153,7 @@
             await chrome.storage.local.set({current: currentList});
             for (const day of days.split(" ")) {
                 const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join("");
-                currentTimes.push([idOfElem, day + ":" + time]);
+                currentTimes.push([idOfElem, day + "~" + time]);
                 const queryString = "#pageContent_eventsgroup" + day;
                 const targetCol = document.querySelector(queryString);
                 targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
