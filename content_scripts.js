@@ -8,6 +8,7 @@
 
     chrome.storage.local.set({'current': []});
     chrome.storage.local.set({'times' : []});
+    chrome.storage.local.set({'overlaps':  []})
 
 
     document.getElementsByClassName("wk-schedule js-full")[0].appendChild(document.importNode(classes, true));
@@ -90,8 +91,8 @@
         const [title, code, days, time, location] = getInfo(parentDiv);
         const [start, end] = time.split("-").map(num => getSeparation(num));
 
-        const overlaps = [];
-        console.log("Time: ");
+        const { r } = await chrome.storage.local.get('overlaps');
+        const currentOverlaps = new Map(r);
         for (const [id, time] of currentTimes) {
             const s = time.split("-")[0];
             const [dayI, s2] = s.split("~");
@@ -105,23 +106,25 @@
                 }
                 if ((start > startI) && (start < endI)) {
                     console.log("Scenario 1");
-                    overlaps.push(id);
-                    overlaps.push(idOfElem);
+                    currentOverlaps.set(id, [...currentOverlaps.get(id) ?? [], idOfElem])
+                    currentOverlaps.set(idOfElem, [...currentOverlaps.get(idOfElem) ?? [], id])
                 } else if ((end > startI) && (end < endI)) {
                     console.log("Scenario 2");
-                    overlaps.push(id);
-                    overlaps.push(idOfElem);
+                    currentOverlaps.set(id, [...currentOverlaps.get(id) ?? [], idOfElem])
+                    currentOverlaps.set(idOfElem, [...currentOverlaps.get(idOfElem) ?? [], id])
                 } else if ((start < startI) && (end > endI)) {
                     console.log("Scenario 3");
-                    overlaps.push(id);
-                    overlaps.push(idOfElem);
+                    currentOverlaps.set(id, [...currentOverlaps.get(id) ?? [], idOfElem])
+                    currentOverlaps.set(idOfElem, [...currentOverlaps.get(idOfElem) ?? [], id])
                 }
             }
                 
         }
 
         console.log("Overlaps: ");
-        console.log(overlaps);
+        console.log(currentOverlaps);
+
+        await chrome.storage.local.set({ overlaps: [...currentOverlaps]})
 
         
 
