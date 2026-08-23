@@ -6,7 +6,9 @@
 
     const classes = doc.querySelector(".course-select-modal");
 
-    chrome.storage.local.set({'current': []})
+    chrome.storage.local.set({'current': []});
+    chrome.storage.local.set({'times' : []});
+    chrome.storage.local.set({'overlaps':  []})
 
 
     document.getElementsByClassName("wk-schedule js-full")[0].appendChild(document.importNode(classes, true));
@@ -59,41 +61,131 @@
             }
         }
         await addNewEvent(targetDiv);
+
+
+        const up = await chrome.storage.local.get('times');
+        const up2 = up.times || [];
         
     });
 
     //I think the best move for the future is to implement a helper function that returns information about the class
     //would return title, code, days, time, location, given that one div that has all of that
 
-   const addNewEvent = async (parentDiv) => {
+    const addNewEvent = async (parentDiv) => {
+
+        //how am i going to go about doing this. i think i have to keep a list of times that have been taken
+        //but then I will also need to keep track of what class that time belongs to so I can assign the right id
+        //and also can remove when needed
+    
 
         const result = await chrome.storage.local.get('current');
         const currentList = result.current || [];
 
-        const [title, code, days, time, location] = getInfo(parentDiv);
+        const res = await chrome.storage.local.get('times');
+        const currentTimes = res.times || [];
 
+        const [title, code, days, time, location] = getInfo(parentDiv);
+        const [start, end] = time.split("-").map(num => getSeparation(num));
+
+        
+
+        
+        //remove if already clicked
         if (currentList.includes(code)) {
             //Code to remove is code, day, then time
+            let updatedTimes = [...currentTimes];
+
+            const { overlaps } = await chrome.storage.local.get('overlaps');
+            const currentOverlaps = new Map(overlaps);
             for (const day of days.split(" ")) {
-                const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join("");
+                const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join(""); 
                 const elementToRemove = document.getElementById(idOfElem);
                 elementToRemove.parentNode.removeChild(elementToRemove);
+                updatedTimes = updatedTimes.filter(item => item[0] !== idOfElem);
+
+                const mainOverlaps = currentOverlaps.get(idOfElem) || [];
+                console.log(mainOverlaps);
+                for (const item of mainOverlaps) {
+                    currentOverlaps.set(item, [...currentOverlaps.get(item).filter(item => item != idOfElem)]);
+                }
+                currentOverlaps.delete(idOfElem);
+
+                
             }
+            for ([key, value] of currentOverlaps) {
+                if (value.length === 0) {
+                    currentOverlaps.delete(key);
+                }
+            }
+            await chrome.storage.local.set({times: updatedTimes});
             
             const updatedList = currentList.filter(item => item !== code);
             await chrome.storage.local.set({ current: updatedList });
 
                 
-        } else {
+            console.log("Overlaps: ");
+            console.log(currentOverlaps);
 
+            await chrome.storage.local.set({ overlaps: [...currentOverlaps]});  
+
+                
+        } else {
+            //not currently there so add it
             currentList.push(code);
+            
             await chrome.storage.local.set({current: currentList});
             for (const day of days.split(" ")) {
+                const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join("");
+                currentTimes.push([idOfElem, day + "~" + time]);
                 const queryString = "#pageContent_eventsgroup" + day;
                 const targetCol = document.querySelector(queryString);
                 targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
-            }    
+            }
+            await chrome.storage.local.set({times: currentTimes});    
+            const { overlaps } = await chrome.storage.local.get('overlaps');
+            const currentOverlaps = new Map(overlaps);
+            for (const [idCurr, timeCurr] of currentTimes) {
+                const s = timeCurr.split("-")[0];
+                const [dayI, s2] = s.split("~");
+                const startI = getSeparation(s2);
+                const endI = getSeparation(timeCurr.split("-")[1]);
+                
+                for (const day of days.split(" ")) {
+                    const idOfElem = code + day + time.split("-")[0].split(" ")[0].split(":").join(""); 
+                    if (day !== dayI) {
+                        continue;
+                    }
+                    if (idCurr === idOfElem) {
+                        continue;
+                    }
+                    if ((start > startI) && (start < endI)) {
+                        console.log("Scenario 1");
+                        currentOverlaps.set(idCurr, [...currentOverlaps.get(idCurr) ?? [], idOfElem])
+                        currentOverlaps.set(idOfElem, [...currentOverlaps.get(idOfElem) ?? [], idCurr])
+                    } else if ((end > startI) && (end < endI)) {
+                        console.log("Scenario 2");
+                        currentOverlaps.set(idCurr, [...currentOverlaps.get(idCurr) ?? [], idOfElem])
+                        currentOverlaps.set(idOfElem, [...currentOverlaps.get(idOfElem) ?? [], idCurr])
+                    } else if ((start <= startI) && (end >= endI)) {
+                        console.log("Scenario 3");
+                        currentOverlaps.set(idCurr, [...currentOverlaps.get(idCurr) ?? [], idOfElem])
+                        currentOverlaps.set(idOfElem, [...currentOverlaps.get(idOfElem) ?? [], idCurr])
+                    }
+                }
+                    
+            }
+                
+            console.log("Overlaps: ");
+            console.log(currentOverlaps);
+
+            await chrome.storage.local.set({ overlaps: [...currentOverlaps]});  
+
         }
+
+        //this is the code for when the element is being added to the page
+        //when the element is being removed from the page, need to check all overlaps it is a part of, and remove itself from those
+        //lowkey shouldn't be very difficult
+          
         
    }  
 })();
