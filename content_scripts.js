@@ -35,6 +35,16 @@
     </li>
     */
 
+    const targetCols = ['pageContent_eventsgroupM', 'pageContent_eventsgroupT', 'pageContent_eventsgroupW', 'pageContent_eventsgroupR', 'pageContent_eventsgroupF'];
+
+    for (const col of targetCols) {
+        const column = document.getElementById(col);
+        const items = column.getElementsByClassName('single-event');
+        for (const item of items) {
+            console.log(item.outerHTML);
+        }
+    }
+
 
     const modal = document.querySelector(".course-select-modal");
     modal.addEventListener("click", async (event) => {
