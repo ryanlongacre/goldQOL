@@ -6,8 +6,12 @@
 
     const classes = doc.querySelector(".course-select-modal");
 
+    //current: just the five digit code
     chrome.storage.local.set({'current': []});
+
+    //times: [five digit code + day of week + start time (no colon, no AM/PM), day of week + ~ + start time full-end time full]
     chrome.storage.local.set({'times' : []});
+
     chrome.storage.local.set({'overlaps':  []})
 
 
@@ -35,15 +39,31 @@
     </li>
     */
 
-    const targetCols = ['pageContent_eventsgroupM', 'pageContent_eventsgroupT', 'pageContent_eventsgroupW', 'pageContent_eventsgroupR', 'pageContent_eventsgroupF'];
+    const targetCols = ['M', 'T', 'W', 'R', 'F'];
+
+    const initialResults = await chrome.storage.local.get('times');
+    const currentTimes = initialResults.times || [];
+
+    let updatedTimes = [...currentTimes];
 
     for (const col of targetCols) {
-        const column = document.getElementById(col);
+        const column = document.getElementById("pageContent_eventsgroup" + col);
         const items = column.getElementsByClassName('single-event');
         for (const item of items) {
-            console.log(item.outerHTML);
+
+            const code = item.id.slice(1,6);
+            const startShort = item.dataset.start.split(" ")[0].split(":").join("");
+            const firstElement = code + col + startShort;
+            const secondElement = col + '~' + item.dataset.start + '-' + item.dataset.end;
+            updatedTimes.push([firstElement, secondElement]);
         }
+
+
     }
+
+    await chrome.storage.local.set({times: updatedTimes});
+
+    
 
 
     const modal = document.querySelector(".course-select-modal");
@@ -73,8 +93,6 @@
         await addNewEvent(targetDiv);
 
 
-        const up = await chrome.storage.local.get('times');
-        const up2 = up.times || [];
         
     });
 
@@ -132,9 +150,6 @@
             const updatedList = currentList.filter(item => item !== code);
             await chrome.storage.local.set({ current: updatedList });
 
-                
-            console.log("Overlaps: ");
-            console.log(currentOverlaps);
 
             await chrome.storage.local.set({ overlaps: [...currentOverlaps]});  
 
@@ -185,8 +200,6 @@
                     
             }
                 
-            console.log("Overlaps: ");
-            console.log(currentOverlaps);
 
             await chrome.storage.local.set({ overlaps: [...currentOverlaps]});  
 
