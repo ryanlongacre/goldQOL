@@ -1,0 +1,10 @@
+.custom {
+    box-shadow: 0 0 0 5px rgba(32, 166, 90, 0.5) inset !important;
+    border: 10px;
+}
+
+.single-event {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
