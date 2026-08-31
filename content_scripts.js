@@ -129,6 +129,12 @@
         if (currentList.includes(code)) {
             //Code to remove is code, day, then time
             let updatedTimes = [...currentTimes];
+            
+            let target = parentDiv;
+            while (target.className !== "row info gridDisplay") {
+                target = target.parentNode;
+            }
+            target.parentNode.className = target.parentNode.className.split(" ")[0];
 
             const { overlaps } = await chrome.storage.local.get('overlaps');
             const currentOverlaps = new Map(overlaps);
@@ -164,6 +170,11 @@
         } else {
             //not currently there so add it
             currentList.push(code);
+            let target = parentDiv;
+            while (target.className !== "row info gridDisplay") {
+                target = target.parentNode;
+            }
+            target.parentNode.className = target.parentNode.className + " clicked";
             
             await chrome.storage.local.set({current: currentList});
             for (const day of days.split(" ")) {
