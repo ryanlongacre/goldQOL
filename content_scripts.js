@@ -17,6 +17,13 @@
 
     document.getElementsByClassName("wk-schedule js-full")[0].appendChild(document.importNode(classes, true));
 
+    const customStyles = document.createElement("link");
+    customStyles.rel = "stylesheet";
+    customStyles.href = chrome.runtime.getURL("custom.css");
+
+    document.getElementsByTagName("head")[0].appendChild(customStyles);
+
+
     /*
     note: the id is 52795T930, and T is the day of the week its on, and 930 is the start time. don't know what 52979 is: its the like enroll code or smth on the thing
     note: also, for the data- things, syntax is object.dataset.day = 'x'; generates data-day = 'x';
@@ -227,7 +234,7 @@ function getSeparation(time) {
 function getNewElement(code, day, time, location, title) {
     //sections have a height of 50px and lectures have a height of 75px
     const sampleEvent = document.createElement("li");
-    sampleEvent.className = "single-event";
+    sampleEvent.className = "single-event custom";
     sampleEvent.dataset.day = day;
     const [start, end] = time.split("-");
     sampleEvent.dataset.start = start;
