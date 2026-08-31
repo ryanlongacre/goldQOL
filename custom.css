@@ -3,6 +3,10 @@
     border: 10px;
 }
 
+.clicked {
+    border-left: 3px solid rgb(46, 126, 186) !important;
+}
+
 .single-event {
     display: flex;
     justify-content: center;
