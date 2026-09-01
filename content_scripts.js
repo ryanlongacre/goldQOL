@@ -12,10 +12,28 @@
     //times: [five digit code + day of week + start time (no colon, no AM/PM), day of week + ~ + start time full-end time full]
     chrome.storage.local.set({'times' : []});
 
-    chrome.storage.local.set({'overlaps':  []})
+    chrome.storage.local.set({'overlaps':  []});
+
+    const container = document.createElement('div');
+    container.className = "course-select-container row";
+    container.style = "display: inline-flex; width: inherit;";
 
 
-    document.getElementsByClassName("wk-schedule js-full")[0].appendChild(document.importNode(classes, true));
+    document.getElementById('schedule-screenshot').parentNode.appendChild(container);
+    container.appendChild(document.importNode(classes, true));
+
+    const correctModal = document.getElementsByClassName('course-select-modal');
+    correctModal.className = correctModal.className + " col-lg-4 col-md-4";
+
+    //elements can only exist in one place at once, so inserting it somewhere moves it from the other place
+    const table = document.getElementsByClassName('capture')[0];
+    table.className = table.className + " col-xl-12 col-md-12"
+    container.prepend(table);
+
+
+
+
+    //document.getElementsByClassName("wk-schedule js-full")[0].appendChild(document.importNode(classes, true));
 
     const customStyles = document.createElement("link");
     customStyles.rel = "stylesheet";
