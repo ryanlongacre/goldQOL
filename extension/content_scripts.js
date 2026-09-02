@@ -94,6 +94,7 @@
     const modal = document.querySelector(".course-select-modal");
     modal.addEventListener("click", async (event) => {
         let targetDiv = event.target;
+        //this can be improved hella with closest() but idc
         if (event.target.tagName != "DIV") {
             return;
         } else if (event.target.innerHTML.includes("top-row-inner-regcart")) {
@@ -105,6 +106,7 @@
             targetDiv = targetDiv.children[0];
         }
         //is a section    
+        //this can be improved hella with closest() but idc
         if (targetDiv.parentNode.parentNode.parentNode.parentNode.parentNode.className === "scheduleItem sectionSelect secondarySection") {
             const lectureDiv = targetDiv.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
             const lectureInfoDiv = lectureDiv.getElementsByClassName("top-row-inner-regcart")[0].children[0];
@@ -201,6 +203,8 @@
                 const queryString = "#pageContent_eventsgroup" + day;
                 const targetCol = document.querySelector(queryString);
                 targetCol.querySelector(".single-event-ul").appendChild(getNewElement(code, day, time, location, title));
+
+                //overlap: rightConflict or leftConflict
             }
             await chrome.storage.local.set({times: currentTimes});    
             const { overlaps } = await chrome.storage.local.get('overlaps');
