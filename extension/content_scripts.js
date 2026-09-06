@@ -341,7 +341,9 @@ async function initiateSpace() {
 
     const targets = document.querySelectorAll('[data-enrollcode]');
     for (const target of targets) {
-        target.className = target.className + " full";
+        if (dict[target.dataset.enrollcode][0] === dict[target.dataset.enrollcode][1]) {
+            target.className = target.className + " full";
+        }
     }
 
     console.log(dict);
