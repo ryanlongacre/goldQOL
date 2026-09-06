@@ -7,6 +7,11 @@
     border-left: 3px solid rgb(46, 126, 186) !important;
 }
 
+.full {
+    box-shadow: 0 0 0 5px rgba(247, 74, 74, 0.5) inset !important;
+    border: 10px;
+}
+
 .single-event {
     display: flex;
     justify-content: center;

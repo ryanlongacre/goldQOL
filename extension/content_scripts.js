@@ -339,6 +339,11 @@ async function initiateSpace() {
         codes.map((key, index) => [key, pairs[index]])
     );
 
+    const targets = document.querySelectorAll('[data-enrollcode]');
+    for (const target of targets) {
+        target.className = target.className + " full";
+    }
+
     console.log(dict);
 }
 
