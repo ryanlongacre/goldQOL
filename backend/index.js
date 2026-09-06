@@ -16,9 +16,6 @@ app.post('/space/:id', async (req, res) => {
         'ucsb-api-version' : '3.0',
         'ucsb-api-key' : process.env.GOLD_API
     }
-    console.log(url);
-    console.log(process.env.GOLD_API);
-
     try {
         const response = await fetch(
             url,
@@ -33,7 +30,18 @@ app.post('/space/:id', async (req, res) => {
         }
 
         const data = await response.json();
-        res.json(data);
+
+        const finalResponse = {
+            codes: [],
+            enrolled: [],
+            space: [],
+        }
+        for (const individualClass of data.classSections) {
+            finalResponse.codes.push(individualClass.enrollCode);
+            finalResponse.enrolled.push(individualClass.enrolledTotal);
+            finalResponse.space.push(individualClass.maxEnroll);
+        }
+        res.json(finalResponse);
     } catch (err) {
         console.error(err);
         res.status(500).json({error: "Something went wrong"});
