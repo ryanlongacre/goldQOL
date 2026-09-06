@@ -341,8 +341,12 @@ async function initiateSpace() {
 
     const targets = document.querySelectorAll('[data-enrollcode]');
     for (const target of targets) {
+        console.log(`${dict[target.dataset.enrollcode][0]}/${dict[target.dataset.enrollcode][1]}`)
         if (dict[target.dataset.enrollcode][0] === dict[target.dataset.enrollcode][1]) {
-            target.className = target.className + " full";
+            target.className = target.className + " full";  
+        } else {
+            target.className = target.className + " space";
+            target.dataset.space = `${dict[target.dataset.enrollcode][0]}/${dict[target.dataset.enrollcode][1]}`;
         }
     }
 

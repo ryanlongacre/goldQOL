@@ -8,8 +8,32 @@
 }
 
 .full {
-    box-shadow: 0 0 0 5px rgba(247, 74, 74, 0.5) inset !important;
-    border: 10px;
+    position: relative;
+}
+
+.full::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    border-top: 5px solid rgba(243, 103, 115, 0.5);
+    border-right: 5px solid rgba(243, 103, 115, 0.5);
+}
+
+.space {
+    position: relative;
+}
+
+[data-space]::after {
+    content: attr(data-space);
+    font-size: 12px;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    width: 20px;
+    height: 20px;
 }
 
 .single-event {
