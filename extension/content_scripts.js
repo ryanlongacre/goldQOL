@@ -30,6 +30,8 @@
     table.className = table.className + " col-xl-12 col-md-12"
     container.prepend(table);
 
+    initiateSpace();
+
 
 
 
@@ -318,4 +320,13 @@ function getInfo(d) {
     targetDiv = targetDiv.getElementsByClassName('courseTitle')[0].querySelectorAll('[id*="Id"]')[0];
     const title = targetDiv.innerText;
     return [title, code, days, time, location];  
+}
+
+function initiateSpace() {
+    const modal = document.getElementsByClassName('course-select-modal')[0];
+    const scheduleItems = modal.children;
+    for (const item of [...scheduleItems].slice(1)) {
+        const target = item.children[1].getElementsByClassName('sectionSelect')[0];
+        console.log(target.dataset.enrollcode);
+    }
 }
