@@ -30,6 +30,8 @@
     table.className = table.className + " col-xl-12 col-md-12"
     container.prepend(table);
 
+    initiateSpace();
+
 
 
 
@@ -318,4 +320,56 @@ function getInfo(d) {
     targetDiv = targetDiv.getElementsByClassName('courseTitle')[0].querySelectorAll('[id*="Id"]')[0];
     const title = targetDiv.innerText;
     return [title, code, days, time, location];  
+}
+
+async function initiateSpace() {
+    const modal = document.getElementsByClassName('course-select-modal')[0];
+    const scheduleItems = modal.children;
+    const codes = [];
+    const pairs = [];
+    for (const item of [...scheduleItems].slice(1)) {
+        const target = item.children[1].getElementsByClassName('sectionSelect')[0];
+        const data = await fetchData(target.dataset.enrollcode);
+        codes.push(...data.codes);
+        for (let i = 0; i < data.enrolled.length; i++) {
+            pairs.push([data.enrolled[i], data.space[i]]);
+        }
+    }
+    const dict = Object.fromEntries(
+        codes.map((key, index) => [key, pairs[index]])
+    );
+
+    const targets = document.querySelectorAll('[data-enrollcode]');
+    for (const target of targets) {
+        if (dict[target.dataset.enrollcode][0] === dict[target.dataset.enrollcode][1]) {
+            target.className = target.className + " full";
+        }
+    }
+
+    console.log(dict);
+}
+
+async function fetchData(code) {
+    const url = `http://localhost:8080/space/`;
+    try {
+        const response = await fetch(
+            url + code,
+            {
+                method: "POST",
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                },
+            }
+        );
+
+        if (!response.ok) {
+            console.log('yeah idk it didn\'t work');
+        }
+
+        const data = await response.json();
+
+        return data;
+    } catch (err) {
+        console.error(err);
+    }
 }
