@@ -13,7 +13,7 @@ app.use(express.json());
 app.post('/space/:id', async (req, res) => {
     const { id } = req.params;
 
-    const quarter = "20264"
+    const quarter = "20271"
     const url = `https://api.ucsb.edu/academics/curriculums/v3/classes/${quarter}/${id}?includeClassSections=true`
     const headers = {
         'accept' : 'application/json',
